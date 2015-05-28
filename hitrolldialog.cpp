@@ -44,7 +44,7 @@ void HitRollDialog::updateTarget()
 {
     if (!_attacker)
         return;
-    if (_attacker->hasShield())
+    if (_defender->hasShield())
         ui->_shield->setText("Shield hit required\nby defender");
     ui->_target->setText(QString("Less or equal\n than \n %1 with D20").arg(_attack-_defence));
 }

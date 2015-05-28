@@ -104,13 +104,40 @@ void CombatRoundController::setCombatRoundWidget(CombatRoundWidget *widget)
 
     connect(_combatRoundWidget,SIGNAL(defenceUpdated(int)),this,SLOT(defenceUpdated(int)));
 
+    connect(_combatRoundWidget,SIGNAL(clearClicked()),this,SLOT(clearDeadPeople()));
+
 }
 
 void CombatRoundController::defenderShieldUpdated(bool s)
 {
     qDebug() << "set shield to " << s;
-    if (_currentDefender)
+    //if (_currentDefender)
         this->_currentDefender->setShield(s);
+}
+
+void CombatRoundController::clearDeadPeople()
+{
+    //Memory leak
+    _currentAttacker = NULL;
+    _currentDefender = NULL;
+    _currentAttackerWeapon = NULL;
+    _combatRoundWidget->clearPlayers();
+    QMap<QString, Player*>::iterator i = _players.begin();
+    while (i != _players.end()) {
+        if (i.value()->healthPoints() <= -3)
+            i = _players.erase(i);
+        else
+            ++i;
+    }
+    i = _players.begin();
+    while (i != _players.end()) {
+        _combatRoundWidget->addPlayer(i.key());
+        ++i;
+    }
+
+    return;
+
+
 }
 
 void CombatRoundController::attackerHPUpdated(int hp)
@@ -161,6 +188,8 @@ void CombatRoundController::playRound()
 
 void CombatRoundController::attackerSelected(const QString &attacker)
 {
+    if (attacker.isEmpty())
+        return;
     qDebug() << "Attacker selected: "<< attacker;
     _currentAttacker = _players[attacker];
 
@@ -183,7 +212,7 @@ void CombatRoundController::attackerSelected(const QString &attacker)
 
     _combatRoundWidget->enableWeapons(true);
     _combatRoundWidget->enableHitRoll(true);
-    _combatRoundWidget->enableHealthPointsAttacker(true);
+    //_combatRoundWidget->enableHealthPointsAttacker(true);
 
 
 

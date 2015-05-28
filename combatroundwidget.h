@@ -17,6 +17,8 @@ public:
     ~CombatRoundWidget();
     Ui::CombatRoundWidget* ui() {return _ui;}
     void addWeapon(QString weapon);
+    void clearPlayers();
+    void addPlayer(QString p);
 
     void setCurrentWeapon(QString);
     void setCurrentBonus(int);
@@ -29,7 +31,7 @@ public:
 
     void enableWeapons(bool b);
     void enableHitRoll(bool b);
-    void enableHealthPointsAttacker(bool b);
+    //void enableHealthPointsAttacker(bool b);
 
 signals:
     void attackerHPUpdated(int);
@@ -37,6 +39,7 @@ signals:
 
     void defenderShieldUpdated(bool);
     void playRoundClicked();
+    void clearClicked();
 
     void newAttackerAdded(QString);
     //void newDefenderAdded(QString);
@@ -58,6 +61,8 @@ private slots:
     void focusChanged(QWidget*oldwidget,QWidget *newwidget);
     void increaseValue();
     void decreaseValue();
+    void connectAll();
+    void disconnectAll();
 
 
 private:

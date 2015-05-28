@@ -47,6 +47,7 @@ public slots:
 
     void defenderShieldUpdated(bool);
 
+    void clearDeadPeople();
 
     void playRound();
 

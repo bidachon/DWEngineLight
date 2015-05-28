@@ -294,35 +294,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_hasShield">
+          <widget class="QCheckBox" name="_hasShield">
            <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>20</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">
-QPushButton::checked {
-	background-color: rgb(0, 0, 255);
-}</string>
-           </property>
            <property name="text">
             <string>S</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="autoExclusive">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -401,6 +378,18 @@ QPushButton::checked {
          </property>
          <property name="text">
           <string>Attack</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="_clear">
+         <property name="font">
+          <font>
+           <pointsize>20</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Clear Deads</string>
          </property>
         </widget>
        </item>

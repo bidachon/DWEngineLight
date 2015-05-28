@@ -20,42 +20,42 @@ CombatRoundWidget::CombatRoundWidget(QWidget *parent) :
     for (int i = 1 ; i < 20; i++)
         QListWidgetItem *item = new QListWidgetItem(QString("%1").arg(i),_ui->_defence);
 
+connectAll();
+
+    //_ui->_healthPointsAttacker->toggle();
+
+}
+
+void CombatRoundWidget::connectAll()
+{
     connect(_ui->_newAttacker,SIGNAL(returnPressed()),this,SLOT(addNewAttacker()));
-    //connect(_ui->_newDefender,SIGNAL(returnPressed()),this,SLOT(addNewAttacker()));
-
-    //connect(_ui->_healthPointsAttacker,SIGNAL(valueChanged(int)),this,SIGNAL(attackerHPUpdated(int)));
-    //connect(_ui->_healthPointsDefender,SIGNAL(valueChanged(int)),this,SIGNAL(defenderHPUpdated(int)));
-
     connect(_ui->_increase,SIGNAL(clicked()),this,SLOT(increaseValue()));
     connect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
-
-    /*QSignalMapper *signalMapper = new QSignalMapper(this);
-    signalMapper->setMapping(_ui->_healthPointsAttacker, 0);
-    signalMapper->setMapping(_ui->_healthPointsDefender, 1);
-    signalMapper->setMapping(_ui->_bonus, 2);
-
-    connect(_ui->_healthPointsAttacker,SIGNAL(clicked()), signalMapper, SLOT(map()));
-    connect(_ui->_healthPointsDefender, SIGNAL(clicked()), signalMapper, SLOT(map()));
-    connect(_ui->_bonus, SIGNAL(clicked()), signalMapper, SLOT(map()));
-    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(handleSelection(int)));*/
-
-    //connect(_ui->_healthPointsAttacker,SIGNAL(toggled(bool)),this,SIGNAL(attackerHPUpdated(int)));
-    //connect(_ui->_healthPointsDefender,SIGNAL(toggled(bool)),this,SIGNAL(defenderHPUpdated(int)));
-    //connect(_ui->_bonus,SIGNAL(toggled(bool)),this,SIGNAL(defenderHPUpdated(int)));
-
     connect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
     connect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
-
     connect(_ui->_attackers,SIGNAL(currentTextChanged(QString)),this,SIGNAL(attackerSelected(QString)));
     connect(_ui->_defenders,SIGNAL(currentTextChanged(QString)),this,SIGNAL(defenderSelected(QString)));
     connect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
     connect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
     connect(_ui->_defence,SIGNAL(currentTextChanged(QString)),this,SLOT(defenceStrUpdated(QString)));
-
     connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)),this,SLOT(focusChanged(QWidget*,QWidget*)));
+    connect(_ui->_clear,SIGNAL(clicked()),this,SIGNAL(clearClicked()));
+}
 
-    //_ui->_healthPointsAttacker->toggle();
-
+void CombatRoundWidget::disconnectAll()
+{
+    disconnect(_ui->_newAttacker,SIGNAL(returnPressed()),this,SLOT(addNewAttacker()));
+    disconnect(_ui->_increase,SIGNAL(clicked()),this,SLOT(increaseValue()));
+    disconnect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
+    disconnect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
+    disconnect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
+    disconnect(_ui->_attackers,SIGNAL(currentTextChanged(QString)),this,SIGNAL(attackerSelected(QString)));
+    disconnect(_ui->_defenders,SIGNAL(currentTextChanged(QString)),this,SIGNAL(defenderSelected(QString)));
+    disconnect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
+    disconnect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
+    disconnect(_ui->_defence,SIGNAL(currentTextChanged(QString)),this,SLOT(defenceStrUpdated(QString)));
+    disconnect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)),this,SLOT(focusChanged(QWidget*,QWidget*)));
+    disconnect(_ui->_clear,SIGNAL(clicked()),this,SIGNAL(clearClicked()));
 }
 
 void CombatRoundWidget::setCurrentBonus(int bonus)
@@ -160,12 +160,24 @@ void CombatRoundWidget::addWeapon(QString weapon){
     QListWidgetItem *item = new QListWidgetItem(weapon,_ui->_weapons);
 }
 
-void CombatRoundWidget::addNewAttacker()
+void CombatRoundWidget::clearPlayers()
 {
-    QString newAttacker = _ui->_newAttacker->text();
-    _ui->_newAttacker->clear();
-    if (newAttacker.isEmpty())
-        return;
+disconnectAll();
+    _ui->_attackers->clear();
+    _ui->_defenders->clear();
+    _ui->_weapons->setEnabled(false);
+    _ui->_defenders->setEnabled(false);
+    _ui->_attack->setEnabled(false);
+    _ui->_defence->setEnabled(false);
+    _ui->_hasShield->setEnabled(false);
+    _ui->_hitRoll->setEnabled(false);
+
+connectAll();
+
+}
+
+void CombatRoundWidget::addPlayer(QString newAttacker)
+{
     if (_ui->_attackers->findItems(newAttacker,Qt::MatchFixedString).size() != 0)
         return;
     emit newAttackerAdded(newAttacker);
@@ -173,6 +185,15 @@ void CombatRoundWidget::addNewAttacker()
     _ui->_attackers->addItem(item);
     _ui->_defenders->addItem(item->clone());
     _ui->_attackers->setCurrentItem(item);
+}
+
+void CombatRoundWidget::addNewAttacker()
+{
+    QString newAttacker = _ui->_newAttacker->text();
+    _ui->_newAttacker->clear();
+    if (newAttacker.isEmpty())
+        return;
+    addPlayer(newAttacker);
 
 }
 
@@ -217,7 +238,7 @@ void CombatRoundWidget::setCurrentDefender(QString defenderName)
     assert(list.size() != 0);
     _ui->_defenders->setCurrentItem(list.at(0));
     _ui->_defence->setEnabled(true);
-    _ui->_healthPointsDefender->setEnabled(true);
+    //_ui->_healthPointsDefender->setEnabled(true);
     _ui->_hasShield->setEnabled(true);
 
 }
@@ -242,10 +263,10 @@ void CombatRoundWidget::enableHitRoll(bool b)
     _ui->_hitRoll->setEnabled(b);
 }
 
-void CombatRoundWidget::enableHealthPointsAttacker(bool b)
+/*void CombatRoundWidget::enableHealthPointsAttacker(bool b)
 {
     _ui->_healthPointsAttacker->setEnabled(b);
-}
+}*/
 
 void CombatRoundWidget::setCurrentAttack(int attack)
 {
