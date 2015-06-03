@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "hitrolldialog.h"
 #include "armourbypassdialog.h"
+#include "combatroundmodel.h"
 
 class CombatRoundController : public QObject
 {
@@ -51,16 +52,19 @@ public slots:
 
     void playRound();
 
-private:
+private slots:
     void generateWeaponList();
+
+private:
+
     CombatRoundWidget *_combatRoundWidget;
-    QMap<QString, Weapon*> _weapons;
     QMap<QString,Player*> _players;
     Player* _currentAttacker;
     Weapon* _currentAttackerWeapon;
     int _currentAttack;
     Player* _currentDefender;
     int _currentDefence;
+    CombatRoundModel *_model;
 };
 
 #endif // COMBATROUNDCONTROLLER_H

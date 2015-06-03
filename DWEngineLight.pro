@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quick quickwidgets
+QT       += core gui quick quickwidgets enginio
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,14 +17,16 @@ SOURCES += main.cpp\
     hitrolldialog.cpp \
     armourbypassdialog.cpp \
     combatroundwidget.cpp \
-    combatroundcontroller.cpp
+    combatroundcontroller.cpp \
+    combatroundmodel.cpp
 
 HEADERS  += mainwindow.h \
     player.h \
     hitrolldialog.h \
     armourbypassdialog.h \
     combatroundwidget.h \
-    combatroundcontroller.h
+    combatroundcontroller.h \
+    combatroundmodel.h
 
 FORMS    += mainwindow.ui \
     hitrolldialog.ui \

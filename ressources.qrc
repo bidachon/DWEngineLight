@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>CombatRoundQuickWidget.qml</file>
+        <file>players.db</file>
     </qresource>
 </RCC>

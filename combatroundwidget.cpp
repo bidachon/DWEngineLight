@@ -166,7 +166,7 @@ disconnectAll();
     _ui->_attackers->clear();
     _ui->_defenders->clear();
     _ui->_weapons->setEnabled(false);
-    _ui->_defenders->setEnabled(false);
+    //_ui->_defenders->setEnabled(false);
     _ui->_attack->setEnabled(false);
     _ui->_defence->setEnabled(false);
     _ui->_hasShield->setEnabled(false);
@@ -228,7 +228,9 @@ void CombatRoundWidget::defenceStrUpdated(QString str)
 void CombatRoundWidget::setCurrentWeapon(QString lastWeapon)
 {
     QList<QListWidgetItem *> list = _ui->_weapons->findItems(lastWeapon,Qt::MatchExactly);
-    assert(list.size() != 0);
+    if (list.empty())
+            return;
+
     _ui->_weapons->setCurrentItem(list.at(0));
 }
 

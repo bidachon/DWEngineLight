@@ -3,12 +3,20 @@
 
 #include <QMap>
 #include <QDebug>
+#include <QJsonObject>
 
 class Weapon
 {
 public:
     Weapon():_name("Sword"),_armourBypass("D8"),_dammage(4){}
     Weapon(QString name, QString armourBypass, int dammage):_name(name),_armourBypass(armourBypass),_dammage(dammage){}
+    Weapon(const QJsonObject &obj)
+    {
+        _name = obj["name"].toString();
+        _armourBypass = obj["bypass"].toString();
+        _dammage = obj["dammage"].toInt();
+    }
+
     QString _name;
     QString _armourBypass;
     int _dammage;
@@ -20,6 +28,13 @@ public:
         else
             str = QString("%1 (%2+%3) %4").arg(_name).arg(_armourBypass).arg(bonus).arg(_dammage+bonus);
         return str;
+    }
+
+    void write(QJsonObject& json)
+    {
+        json["name"] = _name;
+        json["bypass"] = _armourBypass;
+        json["dammage"] = _dammage;
     }
 };
 
