@@ -76,6 +76,7 @@ void CombatRoundController::clearDeadPeople()
     }
     i = _players.begin();
     while (i != _players.end()) {
+        /** @todo addPlayer will trigger the signal attackerAdded to change */
         _combatRoundWidget->addPlayer(i.key());
         ++i;
     }
@@ -138,7 +139,7 @@ void CombatRoundController::attackerSelected(const QString &attacker)
         return;
     qDebug() << "Attacker selected: "<< attacker;
 
-    _currentAttacker = _players[attacker];
+    _currentAttacker = _players.value(attacker);
 
     if (!_currentAttacker)
         return;
@@ -153,7 +154,8 @@ void CombatRoundController::attackerSelected(const QString &attacker)
     this->weaponSelected(lastWeapon);//force update if lastWeapon is already the selected weapon but code executed twice then
     _currentAttackerWeapon = _model->weapons()[lastWeapon];
     assert(_currentAttackerWeapon);
-    _currentDefender = _players[_currentAttacker->lastDefenderName()];
+    /** @todo this will add a new entry for given lastDefender with an empty Player pointer to change */
+    _currentDefender = _players.value(_currentAttacker->lastDefenderName());
 
     if (_currentDefender)
     {
@@ -237,7 +239,7 @@ void CombatRoundController::defenderSelected(const QString &defender)
 {
     if(defender.isEmpty())
         return;
-    _currentDefender = _players[defender];
+    _currentDefender = _players.value(defender);
     if (!_currentDefender || !_currentAttacker)
         return;
 

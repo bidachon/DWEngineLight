@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <assert.h>
 #include <QSignalMapper>
+#include <QAbstractItemModel>
 
 CombatRoundWidget::CombatRoundWidget(QWidget *parent) :
     QWidget(parent),
@@ -22,9 +23,19 @@ CombatRoundWidget::CombatRoundWidget(QWidget *parent) :
 
 connectAll();
 
-    //_ui->_healthPointsAttacker->toggle();
 
 }
+
+void CombatRoundWidget::attackerSelected(QModelIndex model)
+{
+    emit attackerSelected(model.data().toString());
+}
+
+void CombatRoundWidget::defenderSelected(QModelIndex model)
+{
+    emit defenderSelected(model.data().toString());
+}
+
 
 void CombatRoundWidget::connectAll()
 {
@@ -33,8 +44,11 @@ void CombatRoundWidget::connectAll()
     connect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
     connect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
     connect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
-    connect(_ui->_attackers,SIGNAL(currentTextChanged(QString)),this,SIGNAL(attackerSelected(QString)));
-    connect(_ui->_defenders,SIGNAL(currentTextChanged(QString)),this,SIGNAL(defenderSelected(QString)));
+    connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelected(QModelIndex)));
+    connect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelected(QModelIndex)));
+
+    //connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(toto(QModelIndex)));
+
     connect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
     connect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
     connect(_ui->_defence,SIGNAL(currentTextChanged(QString)),this,SLOT(defenceStrUpdated(QString)));
@@ -49,8 +63,8 @@ void CombatRoundWidget::disconnectAll()
     disconnect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
     disconnect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
     disconnect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
-    disconnect(_ui->_attackers,SIGNAL(currentTextChanged(QString)),this,SIGNAL(attackerSelected(QString)));
-    disconnect(_ui->_defenders,SIGNAL(currentTextChanged(QString)),this,SIGNAL(defenderSelected(QString)));
+    disconnect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelected(QModelIndex)));
+    disconnect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelected(QModelIndex)));
     disconnect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
     disconnect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
     disconnect(_ui->_defence,SIGNAL(currentTextChanged(QString)),this,SLOT(defenceStrUpdated(QString)));

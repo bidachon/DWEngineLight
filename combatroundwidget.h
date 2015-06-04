@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QListWidgetItem>
 
 namespace Ui {
 class CombatRoundWidget;
@@ -53,8 +54,11 @@ signals:
     void bonusUpdated(int);
 
 private slots:
+
     void addNewAttacker();
     //void addNewDefender();
+    void attackerSelected(QModelIndex model);
+    void defenderSelected(QModelIndex model);
     void attackStrUpdated(QString);
     void defenceStrUpdated(QString);
     void handleSelection(int item);
