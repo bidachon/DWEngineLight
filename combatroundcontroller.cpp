@@ -1,11 +1,13 @@
 #include "combatroundcontroller.h"
 #include "hitrolldialog.h"
-#include <enginioclient.h>
+#include "enginioclient.h"
+#include "playereditdialog.h"
 #include <QFile>
 
 CombatRoundController::CombatRoundController(QObject *parent) : QObject(parent)
 {
 _model = new CombatRoundModel(this);
+_playerModel = new PlayerListModel();
 }
 
 CombatRoundController::~CombatRoundController()
@@ -26,6 +28,7 @@ void CombatRoundController::generateWeaponList()
 void CombatRoundController::setCombatRoundWidget(CombatRoundWidget *widget)
 {
     _combatRoundWidget = widget;
+    _combatRoundWidget->setPlayerListModel(_playerModel);
     _currentAttacker = NULL;
     _currentDefender = NULL;
 
@@ -36,13 +39,13 @@ void CombatRoundController::setCombatRoundWidget(CombatRoundWidget *widget)
     connect(_combatRoundWidget,SIGNAL(bonusUpdated(int)),this,SLOT(bonusUpdated(int)));
 
     connect(_combatRoundWidget,SIGNAL(playRoundClicked()),this,SLOT(playRound()));
-
+    connect(_combatRoundWidget,SIGNAL(editPlayer(QModelIndex)),this,SLOT(editPlayer(QModelIndex)));
     connect(_combatRoundWidget,SIGNAL(newAttackerAdded(QString)),this,SLOT(newAttackerAdded(QString)));
 
     connect(_combatRoundWidget,SIGNAL(weaponSelected(QString)),this,SLOT(weaponSelected(QString)));
     connect(_combatRoundWidget,SIGNAL(attackUpdated(int)),this,SLOT(attackUpdated(int)));
-    connect(_combatRoundWidget,SIGNAL(defenderSelected(QString)),this,SLOT(defenderSelected(QString)));
-    connect(_combatRoundWidget,SIGNAL(attackerSelected(QString)),this,SLOT(attackerSelected(QString)));
+    connect(_combatRoundWidget,SIGNAL(defenderSelected(QModelIndex)),this,SLOT(defenderSelected(QModelIndex)));
+    connect(_combatRoundWidget,SIGNAL(attackerSelected(QModelIndex)),this,SLOT(attackerSelected(QModelIndex)));
 
     connect(_combatRoundWidget,SIGNAL(defenceUpdated(int)),this,SLOT(defenceUpdated(int)));
 
@@ -51,6 +54,14 @@ void CombatRoundController::setCombatRoundWidget(CombatRoundWidget *widget)
     connect(_model,SIGNAL(finished()),this,SLOT(generateWeaponList()));
     _model->fetchData();
 
+}
+
+void CombatRoundController::editPlayer(QModelIndex index)
+{
+    PlayerEditDialog dialog(_combatRoundWidget);
+    Player *p = _playerModel->player(index);
+    dialog.setPlayer(p);
+    dialog.exec();
 }
 
 void CombatRoundController::defenderShieldUpdated(bool s)
@@ -67,19 +78,7 @@ void CombatRoundController::clearDeadPeople()
     _currentDefender = NULL;
     _currentAttackerWeapon = NULL;
     _combatRoundWidget->clearPlayers();
-    QMap<QString, Player*>::iterator i = _players.begin();
-    while (i != _players.end()) {
-        if (i.value()->healthPoints() <= -3)
-            i = _players.erase(i);
-        else
-            ++i;
-    }
-    i = _players.begin();
-    while (i != _players.end()) {
-        /** @todo addPlayer will trigger the signal attackerAdded to change */
-        _combatRoundWidget->addPlayer(i.key());
-        ++i;
-    }
+    _playerModel->clearDeads();
 
     return;
 
@@ -133,20 +132,20 @@ void CombatRoundController::playRound()
 }
 
 
-void CombatRoundController::attackerSelected(const QString &attacker)
+void CombatRoundController::attackerSelected(const QModelIndex &index)
 {
-    if (attacker.isEmpty())
+    if (!index.isValid())
         return;
-    qDebug() << "Attacker selected: "<< attacker;
+    //qDebug() << "Attacker selected: "<< attacker;
 
-    _currentAttacker = _players.value(attacker);
+    _currentAttacker = _playerModel->player(index);
 
     if (!_currentAttacker)
         return;
 
     _combatRoundWidget->setHealthPointsAttacker(_currentAttacker->healthPoints());
     QString lastWeapon = _currentAttacker->lastWeaponUsed();
-    qDebug() << "Last weapon used for player " << attacker << " is " << lastWeapon;
+    qDebug() << "Last weapon used for player " << _currentAttacker->name() << " is " << lastWeapon;
 
     _combatRoundWidget->setCurrentWeapon(lastWeapon);
     _combatRoundWidget->setCurrentBonus(_currentAttacker->bonus(lastWeapon));
@@ -155,12 +154,13 @@ void CombatRoundController::attackerSelected(const QString &attacker)
     _currentAttackerWeapon = _model->weapons()[lastWeapon];
     assert(_currentAttackerWeapon);
     /** @todo this will add a new entry for given lastDefender with an empty Player pointer to change */
-    _currentDefender = _players.value(_currentAttacker->lastDefenderName());
+    _currentDefender = _playerModel->player(_currentAttacker->lastDefenderName());
 
     if (_currentDefender)
     {
-        _combatRoundWidget->setCurrentDefender(_currentDefender->name());
-        this->defenderSelected(_currentDefender->name());
+        QModelIndex index = _playerModel->find(_currentDefender->name());
+        _combatRoundWidget->setCurrentDefender(index);
+        this->defenderSelected(_playerModel->find(_currentDefender->name()));
     }
 
 
@@ -175,10 +175,10 @@ void CombatRoundController::attackerSelected(const QString &attacker)
 void CombatRoundController::newAttackerAdded(QString newAttacker)
 {
     //qDebug() << "newAttacker Added";
-    if (_players.count(newAttacker) ==0)
+    if (!_playerModel->exists(newAttacker))
     {
         Player *p = new Player(newAttacker);
-        _players[newAttacker] = p;
+        _playerModel->addPlayer(p);
         qDebug() << "newAttacker added: " << newAttacker;
         _currentAttacker = p;
 
@@ -193,10 +193,10 @@ void CombatRoundController::newAttackerAdded(QString newAttacker)
 void CombatRoundController::newDefenderAdded(QString newDefender)
 {
 
-    if (_players.count(newDefender) ==0)
+    if (!_playerModel->exists(newDefender))
     {
         Player *p = new Player(newDefender);
-        _players[newDefender] = p;
+        _playerModel->addPlayer(p);
         qDebug() << "newDefender added: " << newDefender;
     }
     else
@@ -235,17 +235,16 @@ void CombatRoundController::attackUpdated(int attack)
     _currentAttacker->setAttack(_currentAttackerWeapon->toString(),_currentAttack);
 }
 
-void CombatRoundController::defenderSelected(const QString &defender)
+void CombatRoundController::defenderSelected(const QModelIndex &index)
 {
-    if(defender.isEmpty())
+    if(!index.isValid())
         return;
-    _currentDefender = _players.value(defender);
+    _currentDefender = _playerModel->player(index);
     if (!_currentDefender || !_currentAttacker)
         return;
 
-    qDebug() << "Defender Selected: "<< defender;
+    qDebug() << "Defender Selected: "<< _currentDefender->name();
 
-    qDebug() << _players.count(_currentDefender->name());
     _currentAttacker->setDefenderName(_currentDefender->name());
     _currentDefence = _currentDefender->defence();
     _combatRoundWidget->setHealthPointsDefender(_currentDefender->healthPoints());

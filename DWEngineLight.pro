@@ -18,7 +18,9 @@ SOURCES += main.cpp\
     armourbypassdialog.cpp \
     combatroundwidget.cpp \
     combatroundcontroller.cpp \
-    combatroundmodel.cpp
+    combatroundmodel.cpp \
+    playerlistmodel.cpp \
+    playereditdialog.cpp
 
 HEADERS  += mainwindow.h \
     player.h \
@@ -26,12 +28,15 @@ HEADERS  += mainwindow.h \
     armourbypassdialog.h \
     combatroundwidget.h \
     combatroundcontroller.h \
-    combatroundmodel.h
+    combatroundmodel.h \
+    playerlistmodel.h \
+    playereditdialog.h
 
 FORMS    += mainwindow.ui \
     hitrolldialog.ui \
     armourbypassdialog.ui \
-    combatroundwidget.ui
+    combatroundwidget.ui \
+    playereditdialog.ui
 
 DISTFILES += \
     CombatRoundQuickWidget.qml

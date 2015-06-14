@@ -11,6 +11,7 @@
 #include "hitrolldialog.h"
 #include "armourbypassdialog.h"
 #include "combatroundmodel.h"
+#include "playerlistmodel.h"
 
 class CombatRoundController : public QObject
 {
@@ -24,7 +25,7 @@ signals:
 
 public slots:
 
-    void attackerSelected(const QString &attacker);
+    void attackerSelected(const QModelIndex &index);
 
     void newAttackerAdded(QString);
 
@@ -36,7 +37,7 @@ public slots:
 
     void attackUpdated(int attack);
 
-    void defenderSelected(const QString &defender);
+    void defenderSelected(const QModelIndex &index);
 
     void defenceUpdated(int defence);
 
@@ -54,11 +55,12 @@ public slots:
 
 private slots:
     void generateWeaponList();
+    void editPlayer(QModelIndex);
 
 private:
 
     CombatRoundWidget *_combatRoundWidget;
-    QMap<QString,Player*> _players;
+    PlayerListModel *_playerModel;
     Player* _currentAttacker;
     Weapon* _currentAttackerWeapon;
     int _currentAttack;

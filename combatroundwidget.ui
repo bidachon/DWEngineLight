@@ -43,7 +43,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QListWidget" name="_attackers">
+          <widget class="QListView" name="_attackers">
            <property name="font">
             <font>
              <pointsize>20</pointsize>
@@ -206,7 +206,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="_defenders">
+          <widget class="QListView" name="_defenders">
            <property name="font">
             <font>
              <pointsize>20</pointsize>

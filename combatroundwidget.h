@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QListWidgetItem>
+#include <QAbstractListModel>
 
 namespace Ui {
 class CombatRoundWidget;
@@ -19,11 +20,11 @@ public:
     Ui::CombatRoundWidget* ui() {return _ui;}
     void addWeapon(QString weapon);
     void clearPlayers();
-    void addPlayer(QString p);
+    void setPlayerListModel(QAbstractListModel *);
 
     void setCurrentWeapon(QString);
     void setCurrentBonus(int);
-    void setCurrentDefender(QString);
+    void setCurrentDefender(QModelIndex);
     void setHealthPointsAttacker(int);
     void setHealthPointsDefender(int);
     void setCurrentAttack(int);
@@ -45,20 +46,23 @@ signals:
     void newAttackerAdded(QString);
     //void newDefenderAdded(QString);
 
-    void attackerSelected(QString);
-    void defenderSelected(QString);
+    void attackerSelected(QModelIndex);
+    void defenderSelected(QModelIndex);
     void weaponSelected(QString);
 
     void defenceUpdated(int);
     void attackUpdated(int);
     void bonusUpdated(int);
 
+    void editPlayer(QModelIndex);
+
 private slots:
 
     void addNewAttacker();
     //void addNewDefender();
-    void attackerSelected(QModelIndex model);
-    void defenderSelected(QModelIndex model);
+    void addPlayer(QString p);
+    void attackerSelectedSlot(QModelIndex model);
+    void defenderSelectedSlot(QModelIndex model);
     void attackStrUpdated(QString);
     void defenceStrUpdated(QString);
     void handleSelection(int item);

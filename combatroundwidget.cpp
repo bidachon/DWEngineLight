@@ -26,14 +26,14 @@ connectAll();
 
 }
 
-void CombatRoundWidget::attackerSelected(QModelIndex model)
+void CombatRoundWidget::attackerSelectedSlot(QModelIndex model)
 {
-    emit attackerSelected(model.data().toString());
+    emit attackerSelected(model);
 }
 
-void CombatRoundWidget::defenderSelected(QModelIndex model)
+void CombatRoundWidget::defenderSelectedSlot(QModelIndex model)
 {
-    emit defenderSelected(model.data().toString());
+    emit defenderSelected(model);
 }
 
 
@@ -44,10 +44,12 @@ void CombatRoundWidget::connectAll()
     connect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
     connect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
     connect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
-    connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelected(QModelIndex)));
-    connect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelected(QModelIndex)));
+    connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelectedSlot(QModelIndex)));
+    connect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelectedSlot(QModelIndex)));
 
-    //connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(toto(QModelIndex)));
+    connect(_ui->_attackers,SIGNAL(doubleClicked(QModelIndex)),this,SIGNAL(editPlayer(QModelIndex)));
+    connect(_ui->_defenders,SIGNAL(doubleClicked(QModelIndex)),this,SIGNAL(editPlayer(QModelIndex)));
+            //connect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(toto(QModelIndex)));
 
     connect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
     connect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
@@ -63,8 +65,10 @@ void CombatRoundWidget::disconnectAll()
     disconnect(_ui->_decrease,SIGNAL(clicked()),this,SLOT(decreaseValue()));
     disconnect(_ui->_hasShield,SIGNAL(toggled(bool)),this,SIGNAL(defenderShieldUpdated(bool)));
     disconnect(_ui->_hitRoll,SIGNAL(clicked()),this,SIGNAL(playRoundClicked()));
-    disconnect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelected(QModelIndex)));
-    disconnect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelected(QModelIndex)));
+    disconnect(_ui->_attackers,SIGNAL(clicked(QModelIndex)),this,SLOT(attackerSelectedSlot(QModelIndex)));
+    disconnect(_ui->_defenders,SIGNAL(clicked(QModelIndex)),this,SLOT(defenderSelectedSlot(QModelIndex)));
+    disconnect(_ui->_attackers,SIGNAL(doubleClicked(QModelIndex)),this,SIGNAL(editPlayer(QModelIndex)));
+    disconnect(_ui->_defenders,SIGNAL(doubleClicked(QModelIndex)),this,SIGNAL(editPlayer(QModelIndex)));
     disconnect(_ui->_weapons,SIGNAL(currentTextChanged(QString)),this,SIGNAL(weaponSelected(QString)));
     disconnect(_ui->_attack,SIGNAL(currentTextChanged(QString)),this,SLOT(attackStrUpdated(QString)));
     disconnect(_ui->_defence,SIGNAL(currentTextChanged(QString)),this,SLOT(defenceStrUpdated(QString)));
@@ -177,8 +181,8 @@ void CombatRoundWidget::addWeapon(QString weapon){
 void CombatRoundWidget::clearPlayers()
 {
 disconnectAll();
-    _ui->_attackers->clear();
-    _ui->_defenders->clear();
+    //_ui->_attackers->clear();
+    //_ui->_defenders->clear();
     _ui->_weapons->setEnabled(false);
     //_ui->_defenders->setEnabled(false);
     _ui->_attack->setEnabled(false);
@@ -190,15 +194,21 @@ connectAll();
 
 }
 
+void CombatRoundWidget::setPlayerListModel(QAbstractListModel *model)
+{
+    _ui->_attackers->setModel(model);
+    _ui->_defenders->setModel(model);
+}
+
 void CombatRoundWidget::addPlayer(QString newAttacker)
 {
-    if (_ui->_attackers->findItems(newAttacker,Qt::MatchFixedString).size() != 0)
-        return;
+    /*if (_ui->_attackers->findItems(newAttacker,Qt::MatchFixedString).size() != 0)
+        return;*/
     emit newAttackerAdded(newAttacker);
-    QListWidgetItem *item = new QListWidgetItem(newAttacker);
-    _ui->_attackers->addItem(item);
-    _ui->_defenders->addItem(item->clone());
-    _ui->_attackers->setCurrentItem(item);
+    //QListWidgetItem *item = new QListWidgetItem(newAttacker);
+    //_ui->_attackers->addItem(item);
+    //_ui->_defenders->addItem(item->clone());
+    //_ui->_attackers->setCurrentItem(item);
 }
 
 void CombatRoundWidget::addNewAttacker()
@@ -248,13 +258,10 @@ void CombatRoundWidget::setCurrentWeapon(QString lastWeapon)
     _ui->_weapons->setCurrentItem(list.at(0));
 }
 
-void CombatRoundWidget::setCurrentDefender(QString defenderName)
+void CombatRoundWidget::setCurrentDefender(QModelIndex index)
 {
-    QList<QListWidgetItem *> list = _ui->_defenders->findItems(defenderName,Qt::MatchExactly);
-    assert(list.size() != 0);
-    _ui->_defenders->setCurrentItem(list.at(0));
+    _ui->_defenders->setCurrentIndex(index);
     _ui->_defence->setEnabled(true);
-    //_ui->_healthPointsDefender->setEnabled(true);
     _ui->_hasShield->setEnabled(true);
 
 }

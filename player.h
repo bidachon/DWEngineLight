@@ -83,6 +83,16 @@ public:
         _attacks[weapon] = attack;
     }
 
+    void setDefaultAttack(int attack)
+    {
+        _defaultAttack = attack;
+    }
+
+    int defaultAttack() const
+    {
+       return _defaultAttack;
+    }
+
     void setBonus(QString weapon, int bonus)
     {
         _bonuses[weapon] = bonus;
